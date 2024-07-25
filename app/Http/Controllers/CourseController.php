@@ -112,13 +112,17 @@ class CourseController extends Controller
                 }
             }
 
-            $testData = $moduleValue['test'];
-            $testData['module_id'] = $module->id;
-            $test = CourseModuleTest::create($testData);
+            if (isset($moduleValue['test']) && $module->is_testable == 1) {
+                $testData = $moduleValue['test'];
+                $testData['module_id'] = $module->id;
 
-            foreach ($testData['question'] as $questionData) {
-                $questionData['course_module_test_id'] = $test->id;
-                CourseModuleTestQuestion::create($questionData);
+                $test = CourseModuleTest::create($testData);
+                if (isset($testData['question'])) {
+                    foreach ($testData['question'] as $questionData) {
+                        $questionData['course_module_test_id'] = $test->id;
+                        CourseModuleTestQuestion::create($questionData);
+                    }
+                }
             }
         }
 
@@ -188,7 +192,7 @@ class CourseController extends Controller
                 }
             }
 
-            if (isset($moduleData['test'])) {
+            if (isset($moduleData['test']) && $module->is_testable == 1) {
                 $testData = $moduleData['test'];
                 if ($module->courseModuleTest) {
                     $test = CourseModuleTest::findOrFail($module->courseModuleTest->id);
@@ -198,17 +202,21 @@ class CourseController extends Controller
                     $test = CourseModuleTest::create($testData);
                 }
                 $testIds[] = $test->id;
-
-                foreach ($testData['question'] as $questionId => $questionData) {
-                    if (is_numeric($questionId)) {
-                        $question = CourseModuleTestQuestion::findOrFail($questionId);
-                        $question->update($questionData);
-                    } else {
-                        $questionData['course_module_test_id'] = $test->id;
-                        $question = CourseModuleTestQuestion::create($questionData);
+                if (isset($testData['question'])) {
+                    foreach ($testData['question'] as $questionId => $questionData) {
+                        if (is_numeric($questionId)) {
+                            $question = CourseModuleTestQuestion::findOrFail($questionId);
+                            $question->update($questionData);
+                        } else {
+                            $questionData['course_module_test_id'] = $test->id;
+                            $question = CourseModuleTestQuestion::create($questionData);
+                        }
+                        $questionIds[] = $question->id;
                     }
-                    $questionIds[] = $question->id;
                 }
+            } elseif ($module->courseModuleTest) {
+                $test = CourseModuleTest::findOrFail($module->courseModuleTest->id);
+                $test->delete();
             }
         }
 

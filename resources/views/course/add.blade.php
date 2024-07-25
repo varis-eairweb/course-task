@@ -31,7 +31,8 @@
                     </div>
                     <div class="col-12">
                         <label for="course_description" class="form-label">Description</label>
-                        <textarea name="description" class="form-control" id="course_description"></textarea>
+                        <div id="course_description"></div>
+                        <textarea name="description" id="og_description" class="form-control" style="position: absolute;left: -9999px;"></textarea>
                     </div>
                 </li>
             </ul>
@@ -67,6 +68,11 @@
                     'undo', 'redo', '|', 'bold', 'italic', '|',
                     'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor'
                 ]
+            }).then(editor => {
+                // Listen for changes in the editor
+                editor.model.document.on('change:data', () => {
+                    document.getElementById('og_description').value = editor.getData();
+                });
             })
             .catch(error => {
                 console.error('CKEditor error:', error);

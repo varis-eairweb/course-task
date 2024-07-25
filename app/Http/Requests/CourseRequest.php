@@ -31,10 +31,10 @@ class CourseRequest extends FormRequest
             'module.*.is_testable' => 'required',
             'module.*.materials' => 'array',
             'module.*.test' => 'array|required_if:is_testable,1',
-            'module.*.test.title' => 'required',
-            'module.*.test.duration' => 'required',
-            'module.*.test.instructions' => 'required',
-            'module.*.test.questions.*' => 'required',
+            'module.*.test.title' => 'required_if:is_testable,1',
+            'module.*.test.duration' => 'required_if:is_testable,1',
+            'module.*.test.instructions' => 'required_if:is_testable,1',
+            'module.*.test.questions.*' => 'required_if:is_testable,1',
         ];
     }
     public function messages(): array
